@@ -1,0 +1,38 @@
+#!/bin/bash
+function parse_timestamp() {
+	string="$1"
+	TIMESTAMP="${string%%git *}"
+	REMOVED="${TIMESTAMP//:/}"
+	REMOVED2="${REMOVED::-2}"
+	REMOVED3="${REMOVED2//;/}"
+	echo $REMOVED2
+}
+
+
+function parse_commit_msg() {
+	line="$1"
+	msg=$(echo $line | cut -d'"' -f2)
+	echo $msg
+}
+
+function format_date() {
+	timestamp="$1"
+	DATE=`date -d @$((timestamp))`
+	echo $DATE
+	# FORMATTED_DATE=`date +%d-%m-%Y:%H:%M:%S`
+	# echo $FORMATTED_DATE
+}
+
+cd ~
+historyfile=".zsh_history"
+while IFS= read -r line 
+do
+	if [[ $line == *"git commit"* ]]; then
+		# parse_timestamp "$line"
+		timestamp=$( parse_timestamp "$line" )
+		formatted_date=$( format_date $timestamp )
+		msg=$( parse_commit_msg "$line" )
+		echo -e "\e[32m$formatted_date"
+		echo -e "\e[33m\e[1m $msg"
+	fi	
+done < "$historyfile"
